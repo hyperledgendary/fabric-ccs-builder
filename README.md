@@ -22,3 +22,21 @@ The documentation (above) contains references and examples of how you can use ba
 Golang code is more readily and reliably run the peer, and this repo contains the go binaries to do exactly this. 
 
 
+## Docker image 
+
+Build a docker image embedding the `build`, `release`, and `detect` binaries into the /go/bin directory.  For kube-native environments, the 
+fabric-ccs-builder image may be deployed as a sidecar in the peers.  When registered as an external builder in the peer / network configuration, 
+this allows us to deploy external chaincode as a service while using the base fabric images.
+
+```shell 
+docker build \
+  -t hyperledgendary/fabric-ccs-builder \
+  .
+```
+
+TODO: where shall this image be pushed?  Can / should this image be published to docker hub?  For now publish this to the local docker registry running [adjacent to the KIND](https://github.com/jkneubuh/fabric-samples/tree/feature/kind-test-network/test-network-kind#kind) k8s.
+
+```shell 
+docker tag hyperledgendary/fabric-ccs-builder localhost:5000/hyperledgendary/fabric-ccs-builder
+docker push localhost:5000/hyperledgendary/fabric-ccs-builder
+```
