@@ -34,9 +34,3 @@ docker build \
   .
 ```
 
-TODO: where shall this image be pushed?  Can / should this image be published to docker hub?  For now publish this to the local docker registry running [adjacent to the KIND](https://github.com/jkneubuh/fabric-samples/tree/feature/kind-test-network/test-network-kind#kind) k8s.
-
-```shell 
-docker tag hyperledgendary/fabric-ccs-builder localhost:5000/hyperledgendary/fabric-ccs-builder
-docker push localhost:5000/hyperledgendary/fabric-ccs-builder
-```
