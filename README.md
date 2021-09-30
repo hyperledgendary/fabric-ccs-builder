@@ -22,15 +22,88 @@ The documentation (above) contains references and examples of how you can use ba
 Golang code is more readily and reliably run the peer, and this repo contains the go binaries to do exactly this. 
 
 
-## Docker image 
+## Docker Image
 
-Build a docker image embedding the `build`, `release`, and `detect` binaries into the /go/bin directory.  For kube-native environments, the 
-fabric-ccs-builder image may be deployed as a sidecar in the peers.  When registered as an external builder in the peer / network configuration, 
-this allows us to deploy external chaincode as a service while using the base fabric images.
+Build a docker image embedding the `build`, `release`, and `detect` binaries into the /go/bin directory: 
 
 ```shell 
 docker build \
   -t hyperledgendary/fabric-ccs-builder \
   .
 ```
+
+## Peer Configuration
+
+For Fabric networks running on Kubernetes, the ccs-builder image may be used by a sidecar or init container to load the external builder routines into pods running the `hyperledger/fabric-peer`.  For example, the registration of an external builder in core.yaml: 
+
+```yaml
+    externalBuilders:
+      - path: /var/hyperledger/fabric/chaincode/ccs-builder
+        name: ccs-builder
+        propagateEnvironment:
+          - HOME
+          - CORE_PEER_ID
+          - CORE_PEER_LOCALMSPID
+```
+
+may be fulfilled by copying the binaries off of this image into the peer container at init time: 
+
+```yaml 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: org1-peer1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: org1-peer1
+  template:
+    metadata:
+      labels:
+        app: org1-peer1
+    spec:
+      containers:
+        - name: main
+          image: hyperledger/fabric-peer:{{FABRIC_VERSION}}
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: org1-peer1-config
+          ports:
+            - containerPort: 7051
+            - containerPort: 7052
+            - containerPort: 9443
+          volumeMounts:
+            - name: fabric-volume
+              mountPath: /var/hyperledger
+            - name: fabric-config
+              mountPath: /var/hyperledger/fabric/config
+            - name: ccs-builder
+              mountPath: /var/hyperledger/fabric/chaincode/ccs-builder/bin
+
+      # load the external chaincode builder into the peer image prior to peer launch.
+      initContainers:
+        - name: fabric-ccs-builder
+          image: hyperledgendary/fabric-ccs-builder
+          imagePullPolicy: IfNotPresent
+          command: [sh, -c]
+          args: ["cp /go/bin/* /var/hyperledger/fabric/chaincode/ccs-builder/bin/"]
+          volumeMounts:
+            - name: ccs-builder
+              mountPath: /var/hyperledger/fabric/chaincode/ccs-builder/bin
+
+      volumes:
+        - name: fabric-volume
+          persistentVolumeClaim:
+            claimName: fabric-org1
+        - name: fabric-config
+          configMap:
+            name: org1-config
+        - name: ccs-builder
+          emptyDir: {}
+
+```
+
 
