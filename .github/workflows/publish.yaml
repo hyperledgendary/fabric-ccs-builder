@@ -2,7 +2,7 @@ name: fabric-ccs-builder
 
 on:   
   push:
-    # Publish `master` as Docker `latest` image.
+    # Publish `main` as Docker `latest` image.
     branches:
       - main
 
