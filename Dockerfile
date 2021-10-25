@@ -17,7 +17,7 @@ FROM alpine as fabric-ccs-builder
 
 RUN mkdir -p /go/bin
 WORKDIR /go/bin
-COPY --from=golang /go/bin/build /go/bin/build
-COPY --from=golang /go/bin/detect /go/bin/detect
-COPY --from=golang /go/bin/release /go/bin/release
+COPY --from=golang /go/bin/build .
+COPY --from=golang /go/bin/detect .
+COPY --from=golang /go/bin/release .
 
