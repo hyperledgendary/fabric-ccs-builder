@@ -1,5 +1,7 @@
 # fabric-ccs-builder
 
+**Archived:** This project has now been archived. A [chaincode as a service (CCaaS) builder](https://github.com/hyperledger/fabric/tree/main/ccaas_builder) is now available in the main fabric repository.
+
 ## Context
 
 The existing model for chaincode within Fabric, is based around the peer orchestrating the creation and starting of a docker image. Given a set of code, the peer would create a suitable docker container with this code and then start the container. The peer would supply and TLS Certificates, information about the identitiy of the chaincode and the address of the peer. The chaincode library then connects, via a long running gRPC connection, to the peer to 'register'. Transaction requests are then sent from the peer to the chaincode. 
